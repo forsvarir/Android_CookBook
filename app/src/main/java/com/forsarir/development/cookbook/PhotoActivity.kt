@@ -7,6 +7,11 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.Button
 import android.widget.ImageView
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
+
+class PhotoViewModel(var photo: Bitmap? = null) : ViewModel() {
+}
 
 class PhotoActivity : AppCompatActivity() {
     private val REQUEST_IMAGE_CAPTURE = 1
@@ -35,11 +40,19 @@ class PhotoActivity : AppCompatActivity() {
         }
 
         snapImage = findViewById(R.id.imageSnap)
+
+        val model: PhotoViewModel by viewModels()
+
+        if (model.photo != null) {
+            snapImage.setImageBitmap(model.photo)
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            val model: PhotoViewModel by viewModels()
             val imageBitmap = data?.extras?.get("data") as Bitmap
+            model.photo = imageBitmap
             snapImage.setImageBitmap(imageBitmap)
         } else {
             super.onActivityResult(requestCode, resultCode, data)
