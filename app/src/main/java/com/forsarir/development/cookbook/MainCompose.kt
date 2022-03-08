@@ -46,45 +46,41 @@ fun ClickableSample() {
     val dragStart = remember { mutableStateOf("") }
     val dragEnd = remember { mutableStateOf("") }
     val outputMessage = remember { mutableStateOf("") }
-    Box(modifier = Modifier.fillMaxSize()) {
-        var startX by remember { mutableStateOf(0f) }
-        var startY by remember { mutableStateOf(0f) }
-        var posX by remember { mutableStateOf(0f) }
-        var posY by remember { mutableStateOf(0f) }
-        var offsetX by remember { mutableStateOf(0f) }
-        var offsetY by remember { mutableStateOf(0f) }
 
-        Box(
-            Modifier
-                .offset { IntOffset(offsetX.roundToInt(), offsetY.roundToInt()) }
-                .background(Color.Blue)
-                .size(50.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = {
-                            dragStart.value = "FROM:(${it.x},${it.y})"
-                            dragEnd.value = ""
-                            startX = it.x
-                            startY = it.y
-                            posX = it.x
-                            posY = it.y
+    var startX by remember { mutableStateOf(0f) }
+    var startY by remember { mutableStateOf(0f) }
+    var posX by remember { mutableStateOf(0f) }
+    var posY by remember { mutableStateOf(0f) }
+    var offsetX by remember { mutableStateOf(0f) }
+    var offsetY by remember { mutableStateOf(0f) }
 
-                            outputMessage.value = "${dragStart.value},${dragEnd.value}"
-                        },
-                        onDrag = { change, offset ->
-                            posX += offset.x
-                            posY += offset.y
-                            offsetX += offset.x
-                            offsetY += offset.y
-                        },
-                        onDragEnd = {
-                            dragEnd.value = "TO:(${posX},${posY})"
+    Box(modifier = Modifier.fillMaxSize()
+        .pointerInput(Unit) {
+            detectDragGestures(
+                onDragStart = {
+                    dragStart.value = "FROM:(${it.x},${it.y})"
+                    dragEnd.value = ""
+                    startX = it.x
+                    startY = it.y
+                    posX = it.x
+                    posY = it.y
 
-                            outputMessage.value = "${dragStart.value},${dragEnd.value}"
-                        }
-                    )
+                    outputMessage.value = "${dragStart.value},${dragEnd.value}"
+                },
+                onDrag = { change, offset ->
+                    posX += offset.x
+                    posY += offset.y
+                    offsetX += offset.x
+                    offsetY += offset.y
+                },
+                onDragEnd = {
+                    dragEnd.value = "TO:(${posX},${posY})"
+
+                    outputMessage.value = "${dragStart.value},${dragEnd.value}"
                 }
-        )
+            )
+        }
+    ) {
         Text(
             text = outputMessage.value.toString()
         )
