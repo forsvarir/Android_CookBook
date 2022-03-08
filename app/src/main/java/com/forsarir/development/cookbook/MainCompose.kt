@@ -4,9 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -17,8 +15,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Blue
-import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
@@ -47,9 +43,14 @@ class MainCompose : ComponentActivity() {
 
 @Composable
 fun ClickableSample() {
-    val gesture = remember { mutableStateOf("") }
-    val count = remember { mutableStateOf("") }
+    val dragStart = remember { mutableStateOf("") }
+    val dragEnd = remember { mutableStateOf("") }
+    val outputMessage = remember { mutableStateOf("") }
     Box(modifier = Modifier.fillMaxSize()) {
+        var startX by remember { mutableStateOf(0f) }
+        var startY by remember { mutableStateOf(0f) }
+        var posX by remember { mutableStateOf(0f) }
+        var posY by remember { mutableStateOf(0f) }
         var offsetX by remember { mutableStateOf(0f) }
         var offsetY by remember { mutableStateOf(0f) }
 
@@ -59,18 +60,33 @@ fun ClickableSample() {
                 .background(Color.Blue)
                 .size(50.dp)
                 .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        gesture.value = change.position.toString()
-                        change.consumeAllChanges()
-                        gesture.value += "->" + change.position.toString()
-                        offsetX += dragAmount.x
-                        offsetY += dragAmount.y
-                        count.value = gesture.value + "==" + "(${dragAmount.x},${dragAmount.y})"
-                    }
+                    detectDragGestures(
+                        onDragStart = {
+                            dragStart.value = "FROM:(${it.x},${it.y})"
+                            dragEnd.value = ""
+                            startX = it.x
+                            startY = it.y
+                            posX = it.x
+                            posY = it.y
+
+                            outputMessage.value = "${dragStart.value},${dragEnd.value}"
+                        },
+                        onDrag = { change, offset ->
+                            posX += offset.x
+                            posY += offset.y
+                            offsetX += offset.x
+                            offsetY += offset.y
+                        },
+                        onDragEnd = {
+                            dragEnd.value = "TO:(${posX},${posY})"
+
+                            outputMessage.value = "${dragStart.value},${dragEnd.value}"
+                        }
+                    )
                 }
         )
         Text(
-            text = count.value.toString()
+            text = outputMessage.value.toString()
         )
 
     }
