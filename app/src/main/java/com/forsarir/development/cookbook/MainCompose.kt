@@ -12,6 +12,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,47 +48,54 @@ fun DraggableArea() {
     var posY by remember { mutableStateOf(0f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
-    val points = mutableListOf<String>()
+    val points = remember{mutableStateListOf<String>()}
 
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-            Canvas(
-                modifier = Modifier
-                    .width(500.dp)
-                    .height(500.dp)
-                    .background(Color.Red)
-                    .padding(16.dp)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = {
-                                dragStart.value = "FROM:(${it.x},${it.y})"
-                                dragEnd.value = ""
-                                posX = it.x
-                                posY = it.y
+        Canvas(
+            modifier = Modifier
+                .width(500.dp)
+                .height(500.dp)
+                .background(Color.Red)
+                .padding(16.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures(
+                        onDragStart = {
+                            dragStart.value = "FROM:(${it.x},${it.y})"
+                            dragEnd.value = ""
+                            posX = it.x
+                            posY = it.y
 
-                                points.clear()
-                                outputMessage.value = "${dragStart.value},${dragEnd.value}"
-                            },
-                            onDrag = { _, offset ->
-                                posX += offset.x
-                                posY += offset.y
-                                offsetX += offset.x
-                                offsetY += offset.y
-                                points.add("($posX, $posY)")
-                            },
-                            onDragEnd = {
-                                dragEnd.value = "TO:(${posX},${posY})"
+                            points.clear()
+                            outputMessage.value = "${dragStart.value},${dragEnd.value}"
+                        },
+                        onDrag = { _, offset ->
+                            posX += offset.x
+                            posY += offset.y
+                            offsetX += offset.x
+                            offsetY += offset.y
+                            points.add("($posX, $posY)")
+                        },
+                        onDragEnd = {
+                            dragEnd.value = "TO:(${posX},${posY})"
 
-                                val pointsMessage = points.reduce { acc, item ->
-                                    "$acc,$item"
-                                }
-
-                                outputMessage.value = "${dragStart.value},${pointsMessage},${dragEnd.value}"
+                            val pointsMessage = points.reduce { acc, item ->
+                                "$acc,$item"
                             }
-                        )
-                    }
-            ) {}
+
+                            outputMessage.value =
+                                "${dragStart.value},${pointsMessage},${dragEnd.value}"
+                        }
+                    )
+                }
+        ) {
+            points.forEach {
+                val pos = it.substring(1, it.length-1).split(",")
+                drawLine(Color.Blue, Offset(0f,0f), Offset(pos[0].toFloat(), pos[1].toFloat()))
+            }
+        }
         Text(
             text = outputMessage.value
         )
