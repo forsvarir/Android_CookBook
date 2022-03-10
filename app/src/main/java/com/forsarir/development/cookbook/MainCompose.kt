@@ -37,6 +37,8 @@ class MainCompose : ComponentActivity() {
     }
 }
 
+class LinePoints(val Start: Offset, val End: Offset)
+
 
 @Composable
 fun DraggableArea() {
@@ -48,7 +50,7 @@ fun DraggableArea() {
     var posY by remember { mutableStateOf(0f) }
     var offsetX by remember { mutableStateOf(0f) }
     var offsetY by remember { mutableStateOf(0f) }
-    val points = remember{mutableStateListOf<String>()}
+    val points = remember { mutableStateListOf<LinePoints>() }
 
     Box(
         modifier = Modifier
@@ -72,17 +74,23 @@ fun DraggableArea() {
                             outputMessage.value = "${dragStart.value},${dragEnd.value}"
                         },
                         onDrag = { _, offset ->
+                            points.add(
+                                LinePoints(
+                                    Offset(posX, posY),
+                                    Offset(posX + offset.x, posY + offset.y)
+                                )
+                            )
                             posX += offset.x
                             posY += offset.y
                             offsetX += offset.x
                             offsetY += offset.y
-                            points.add("($posX, $posY)")
+//                            points.add("($posX, $posY)")
                         },
                         onDragEnd = {
                             dragEnd.value = "TO:(${posX},${posY})"
 
-                            val pointsMessage = points.reduce { acc, item ->
-                                "$acc,$item"
+                            val pointsMessage = points.fold("") { acc, item ->
+                                "$acc,(${item.End.x}, ${item.End.y})"
                             }
 
                             outputMessage.value =
@@ -92,8 +100,8 @@ fun DraggableArea() {
                 }
         ) {
             points.forEach {
-                val pos = it.substring(1, it.length-1).split(",")
-                drawLine(Color.Blue, Offset(0f,0f), Offset(pos[0].toFloat(), pos[1].toFloat()))
+//                val pos = it.substring(1, it.length - 1).split(",")
+                drawLine(Color.Blue, Offset(it.Start.x, it.Start.y), Offset(it.End.x, it.End.y), strokeWidth = 10f)
             }
         }
         Text(
